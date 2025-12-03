@@ -1,0 +1,68 @@
+@startuml
+skinparam linetype ortho
+skinparam node {
+    shadowing false
+    BackgroundColor #FDFDFD
+    BorderColor #A80036
+}
+skinparam component {
+    shadowing false
+    BackgroundColor #FFF6F8
+    BorderColor #A80036
+}
+skinparam database {
+    shadowing false
+    BackgroundColor #F0F8FF
+    BorderColor #006699
+}
+
+node "Клієнтський пристрій" as Client {
+    artifact "Веб-браузер" as Browser {
+        component "Frontend Додаток\n(React)" as Frontend
+    }
+}
+
+node "Веб-сервер / Реверс-проксі\nNginx" as WebServer {
+    component "Nginx" as Nginx
+    database "Статичні файли\nReact Build" as StaticFiles
+}
+
+node "Сервер Додатку" as AppServer {
+    artifact "Node.js Runtime" as NodeJS {
+        component "Backend API\nExpress.js" as Backend
+    }
+    folder "Файлова система" as FileSystem {
+        component "Директорія uploads" as Uploads
+    }
+}
+
+database "Сервер Бази Даних" as Database {
+    component "MySQL Server" as MySQL
+    database "База даних\nKendrDB" as DB
+}
+
+' Зв'язки між компонентами
+Client --> WebServer : "HTTPS (443)\nЗапит сторінки"
+WebServer --> StaticFiles : "Сервінг статики"
+StaticFiles ..> Frontend : "Доставка клієнту"
+
+Frontend --> WebServer : "HTTPS (443)\nAPI запити"
+WebServer --> AppServer : "HTTP (5000)\nПроксі до API"
+
+Backend --> Database : "SQL (3306)\nЗапити до БД"
+Backend --> FileSystem : "Читання/запис\nфайлів"
+
+note right of Uploads
+  Зберігає:
+  • Аватари
+  • Логотипи
+  • Медіафайли
+end note
+
+note left of StaticFiles
+  Статичні ресурси:
+  • HTML, CSS, JS
+  • Зображення
+  • Шрифти
+end note
+@enduml
