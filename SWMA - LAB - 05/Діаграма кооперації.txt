@@ -1,0 +1,20 @@
+@startuml
+top to bottom direction
+
+object "Адміністратор" as Admin
+object "AdminDashboardPage" as Dashboard
+object "adminController" as Controller
+object "Warning" as Warning
+object "Site" as Site
+object "User" as User
+
+Admin --> Dashboard : 1. Призупинити
+Dashboard --> Controller : 2. Запит
+Controller --> Warning : 2.1 Створити
+Controller --> Warning : 2.2 Підрахунок
+Controller --> User : 2.3 Видалити
+Controller --> Site : 2.4 Призупинити
+Controller --> Dashboard : 2.5 OK
+Dashboard --> Admin : 3. Оновлення
+
+@enduml
