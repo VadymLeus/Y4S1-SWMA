@@ -1,0 +1,213 @@
+@startuml
+' !theme materia
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+hide empty members
+
+
+' =========================================
+' Основні доменні сутності
+' =========================================
+class User {
+    +id : INT (PK)
+    --
+    username : VARCHAR
+    email : VARCHAR
+    role : ENUM('user','admin')
+    avatar_url : VARCHAR
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+class Site {
+    +id : INT (PK)
+    --
+    #user_id : INT (FK)
+    site_path : VARCHAR
+    title : VARCHAR
+    status : ENUM('draft','published')
+    description : TEXT
+    created_at : TIMESTAMP
+}
+
+class Page {
+    +id : INT (PK)
+    --
+    #site_id : INT (FK)
+    slug : VARCHAR
+    block_content : JSON
+    is_homepage : BOOLEAN
+    seo_title : VARCHAR
+    seo_description : TEXT
+    created_at : TIMESTAMP
+}
+
+class Category {
+    +id : INT (PK)
+    --
+    #site_id : INT (FK)
+    name : VARCHAR
+    description : TEXT
+    sort_order : INT
+    created_at : TIMESTAMP
+}
+
+class Product {
+    +id : INT (PK)
+    --
+    #site_id : INT (FK)
+    #category_id : INT (FK)
+    name : VARCHAR
+    description : TEXT
+    price : DECIMAL
+    image_gallery : JSON
+    inventory_count : INT
+    is_available : BOOLEAN
+    created_at : TIMESTAMP
+}
+
+class Tag {
+    +id : INT (PK)
+    --
+    name : VARCHAR
+    created_at : TIMESTAMP
+}
+
+class SupportTicket {
+    +id : INT (PK)
+    --
+    #user_id : INT (FK)
+    subject : VARCHAR
+    body : TEXT
+    status : ENUM('open','in_progress','resolved','closed')
+    priority : ENUM('low','medium','high')
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+class TicketReply {
+    +id : INT (PK)
+    --
+    #ticket_id : INT (FK)
+    #user_id : INT (FK)
+    body : TEXT
+    is_internal : BOOLEAN
+    created_at : TIMESTAMP
+}
+
+class UserWarning {
+    +id : INT (PK)
+    --
+    #user_id : INT (FK)
+    #site_id : INT (FK)
+    reason_note : TEXT
+    severity : ENUM('low','medium','high')
+    is_resolved : BOOLEAN
+    created_at : TIMESTAMP
+}
+
+class UserMedia {
+    +id : INT (PK)
+    --
+    #user_id : INT (FK)
+    path_full : VARCHAR
+    path_thumb : VARCHAR
+    original_file_name : VARCHAR
+    file_size : INT
+    mime_type : VARCHAR
+    created_at : TIMESTAMP
+}
+
+class Template {
+    +id : INT (PK)
+    --
+    name : VARCHAR
+    description : TEXT
+    default_block_content : JSON
+    is_system : BOOLEAN
+    created_at : TIMESTAMP
+}
+
+' =========================================
+' Асоціативні сутності (багато-до-багатьох)
+' =========================================
+class User_Favorite {
+    +id : INT (PK)
+    --
+    #user_id : INT (FK)
+    #site_id : INT (FK)
+    created_at : TIMESTAMP
+}
+
+class Site_Tag {
+    +id : INT (PK)
+    --
+    #site_id : INT (FK)
+    #tag_id : INT (FK)
+    created_at : TIMESTAMP
+}
+
+' =========================================
+' Основні зв'язки доменної моделі
+' =========================================
+User ||--o{ Site : "володіє"
+Site ||--o{ Page : "містить"
+Site ||--o{ Category : "організовує"
+Site ||--o{ Product : "продає"
+Category }o--o{ Product : "категоризує"
+
+User ||--o{ SupportTicket : "створює"
+SupportTicket ||--o{ TicketReply : "має"
+User ||--o{ TicketReply : "пише"
+
+User ||--o{ UserWarning : "отримує"
+Site }o--o{ UserWarning : "пов'язано з"
+
+User ||--o{ UserMedia : "завантажує"
+
+' Зв'язки багато-до-багатьох
+User ||--o{ User_Favorite : "додає в обране"
+Site ||--o{ User_Favorite : "в обраному у"
+Site ||--o{ Site_Tag : "позначено тегами"
+Tag ||--o{ Site_Tag : "використовується для"
+
+' Зв'язки шаблонів
+Template ||--o{ Site : "використовується"
+Template ||--o{ Page : "застосовується до"
+
+' Додаткові зв'язки
+Site }o--|| User_Favorite : "в обраному"
+Site }o--|| Site_Tag : "теги"
+
+
+note right of User
+  Основна сутність, що представляє
+  користувачів та адміністраторів платформи
+end note
+
+note left of Site
+  Основний веб-сайт,
+  яким володіє користувач
+end note
+
+note right of Product
+  Товари електронної комерції
+  з відстеженням інвентарю
+end note
+
+note left of Page
+  Контентні сторінки з
+  блоковим редактором
+end note
+
+note bottom of SupportTicket
+  Система підтримки користувачів
+  з відстеженням статусу
+end note
+
+note top of UserMedia
+  Менеджер медіафайлів
+  для завантажених зображень
+end note
+
+@enduml

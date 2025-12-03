@@ -1,0 +1,231 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+hide empty members
+
+' Контролери
+class SiteController {
+    - siteService : ISiteService
+    + createSite(request)
+    + getSiteByPath(request)
+    + updateSiteSettings(request)
+}
+
+class UserController {
+    - userService : IUserService
+    + register(request)
+    + login(request)
+    + getProfile(request)
+}
+
+class SupportController {
+    - supportService : ISupportService
+    + createTicket(request)
+    + addReply(request)
+    + getTicket(request)
+}
+
+' Сервіси
+interface IService {
+}
+
+interface ISiteService {
+    + createSite(userId, templateId, dto) : Site
+    + findByPath(path) : Site
+    + addPageToSite(siteId, dto) : Page
+    + addProduct(siteId, dto) : Product
+}
+
+interface IUserService {
+    + registerUser(dto) : User
+    + addFavoriteSite(userId, siteId)
+    + handleWarning(userId, siteId, reason)
+}
+
+interface ISupportService {
+    + createTicket(userId, subject, body) : SupportTicket
+    + addReply(ticketId, userId, body, isInternal) : TicketReply
+    + changeTicketStatus(ticketId, newStatus)
+}
+
+class SiteService {
+    - siteRepo : ISiteRepository
+    - pageRepo : IPageRepository
+    - productRepo : IProductRepository
+    - siteFactory : SiteFactory
+    + createSite(userId, templateId, dto) : Site
+}
+
+class UserService {
+    - userRepo : IUserRepository
+    - warningRepo : IUserWarningRepository
+    - favoriteRepo : IFavoriteRepository
+}
+
+class SupportService {
+    - ticketRepo : ISupportTicketRepository
+    - replyRepo : ITicketReplyRepository
+}
+
+' Репозиторії
+class DatabaseContext {
+    + getConnection()
+}
+
+interface IRepository {
+    + getById(id)
+    + getAll()
+    + create(entity)
+    + update(entity)
+    + delete(id)
+}
+
+interface ISiteRepository {
+    + findByPath(path) : Site
+    + findByUserId(userId) : Site[]
+}
+
+interface IUserRepository {
+    + findByEmail(email) : User
+    + findByUsername(username) : User
+}
+
+interface ISupportTicketRepository {
+    + findByStatus(status) : SupportTicket[]
+}
+
+interface IPageRepository {}
+interface IProductRepository {}
+interface IUserWarningRepository {}
+interface ITicketReplyRepository {}
+interface IFavoriteRepository {}
+
+class SiteRepository {
+    - db : DatabaseContext
+    + findByPath(path) : Site
+}
+
+class UserRepository {
+    - db : DatabaseContext
+}
+
+class SupportTicketRepository {
+    - db : DatabaseContext
+}
+
+' Фабрики
+class SiteFactory {
+    + createSiteFromTemplate(user: User, template: Template, title, path) : Site
+}
+
+interface IBlock {
+    + render() : string
+    + validateData(data) : boolean
+}
+
+class TextBlock {}
+class ImageBlock {}
+class ProductGridBlock {}
+
+class BlockFactory {
+    + createBlock(blockData) : IBlock
+}
+
+' State Pattern
+interface ITicketState {
+    + addReply(ticket: SupportTicket, reply: TicketReply)
+    + resolve(ticket: SupportTicket)
+    + close(ticket: SupportTicket)
+    + reopen(ticket: SupportTicket)
+}
+
+class OpenState {}
+class InProgressState {}
+class ResolvedState {}
+class ClosedState {
+    + addReply(...) : Error
+}
+
+' Доменні сутності
+class User {}
+class Site {}
+class Template {
+    + default_block_content
+}
+class Page {
+    - block_content
+    - blocks : IBlock[]
+    + loadBlocks(factory: BlockFactory)
+}
+class Product {}
+class User_Favorite {}
+class SupportTicket {
+    - state : ITicketState
+    + setState(newState: ITicketState)
+    + addReply(reply: TicketReply)
+    + resolve()
+}
+class TicketReply {}
+class UserWarning {}
+
+' =========================================
+' Зв'язки між класами
+' =========================================
+
+' Контролери -> Сервіси
+SiteController --> ISiteService
+UserController --> IUserService
+SupportController --> ISupportService
+
+' Сервіси -> Репозиторії та Фабрики
+SiteService --> ISiteRepository
+SiteService --> IPageRepository
+SiteService --> IProductRepository
+SiteService --> SiteFactory
+UserService --> IUserRepository
+UserService --> IUserWarningRepository
+UserService --> IFavoriteRepository
+SupportService --> ISupportTicketRepository
+SupportService --> ITicketReplyRepository
+
+' Репозиторії -> База даних
+SiteRepository --> DatabaseContext
+UserRepository --> DatabaseContext
+SupportTicketRepository --> DatabaseContext
+
+' Репозиторії -> Сутності
+ISiteRepository --> Site
+IUserRepository --> User
+ISupportTicketRepository --> SupportTicket
+IFavoriteRepository --> User_Favorite
+
+' Фабрики -> Сутності
+SiteFactory --> Site
+SiteFactory --> Template
+
+' Блоки та фабрики блоків
+Page --> IBlock
+BlockFactory --> IBlock
+IBlock <|-- TextBlock
+IBlock <|-- ImageBlock
+IBlock <|-- ProductGridBlock
+Page --> BlockFactory
+
+' State Pattern
+SupportTicket --> ITicketState
+ITicketState <|-- OpenState
+ITicketState <|-- InProgressState
+ITicketState <|-- ResolvedState
+ITicketState <|-- ClosedState
+SupportService --> SupportTicket
+SupportTicket --> TicketReply
+
+' Реалізації інтерфейсів
+ISiteService <|.. SiteService
+IUserService <|.. UserService
+ISupportService <|.. SupportService
+ISiteRepository <|.. SiteRepository
+IUserRepository <|.. UserRepository
+ISupportTicketRepository <|.. SupportTicketRepository
+
+@enduml
