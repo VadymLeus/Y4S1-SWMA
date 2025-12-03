@@ -1,0 +1,48 @@
+@startuml
+
+|Користувач|
+start
+:Заходить на сторінку
+/dashboard/:site_path;
+
+|Система (Бекенд / БД)|
+:Завантажує дані сайту
+(включно з JSON `block_content`
+з табл. `sites`);
+
+|Система (Frontend)|
+:Відображає редактор
+з поточними блоками;
+
+|Користувач|
+:Взаємодіє з редактором;
+fork
+    :Додає новий блок
+    (напр. 'text' або 'hero');
+fork again
+    :Редагує вміст
+    існуючого блоку;
+fork again
+    :Змінює порядок блоків
+    (Drag-and-Drop);
+fork again
+    :Видаляє блок;
+end fork
+:Натискає "Зберегти";
+
+|Система (Frontend)|
+:Формує оновлений
+JSON `block_content`;
+
+|Система (Бекенд / БД)|
+:Отримує JSON;
+:Оновлює `block_content` в `sites`
+(UPDATE `sites` SET `block_content` = ?
+WHERE `site_path` = ?);
+
+|Система (Frontend)|
+:Відображає повідомлення
+"Успішно збережено";
+
+stop
+@enduml
