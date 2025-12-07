@@ -1,0 +1,42 @@
+@startuml
+' Налаштування стилю для презентації
+skinparam state {
+    BackgroundColor #F1F5F9
+    BorderColor #0F172A
+    FontName Arial
+    FontSize 14
+    ArrowColor #334155
+    ArrowFontName Arial
+    ArrowFontSize 12
+}
+skinparam shadowing false
+scale 800 width
+
+' Початок
+[*] --> Draft : Створення сайту
+
+' Стани
+state "Чернетка (Draft)" as Draft {
+  state "Видимість: Тільки Власник" as d1
+}
+
+state "Опубліковано (Published)" as Published {
+  state "Видимість: Публічна (Інтернет)" as p1
+}
+
+state "Призупинено (Suspended)" as Suspended {
+  state "Видимість: Блоковано" as s1
+  state "Таймер видалення: Активний" as s2
+}
+
+' Переходи
+Draft -right-> Published : Публікація\n[Власник]
+Published -left-> Draft : Депублікація\n[Власник]
+
+Published -down-> Suspended : Блокування за порушення\n[Адміністратор]
+Suspended -up-> Draft : Розблокування (Виправлено)\n[Адміністратор]
+
+Draft --> [*] : Видалення\n[Власник]
+Suspended --> [*] : Автоматичне видалення\n[System Timer]
+
+@enduml

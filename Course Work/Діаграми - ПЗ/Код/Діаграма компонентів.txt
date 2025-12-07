@@ -1,0 +1,102 @@
+@startuml
+skinparam componentStyle uml2
+skinparam linetype ortho
+skinparam rectangle {
+    shadowing false
+}
+skinparam node {
+    shadowing false
+}
+skinparam database {
+    shadowing false
+}
+skinparam folder {
+    shadowing false
+}
+
+
+package "Браузер (Клієнт)" {
+    component "Frontend (React)" {
+        [UI Компоненти] as UI
+        [Керування Станом] as State
+        [Роутинг] as Routing
+        [API Клієнт] as ApiClient
+        
+        UI --> Routing : "Рендерить сторінки"
+        UI --> State : "Читає стан"
+        UI --> ApiClient : "Викликає API"
+        Routing --> State : "Перевіряє доступ"
+        ApiClient --> [localStorage] : "Читає токен"
+    }
+    
+    [localStorage]
+    State -> [localStorage] : "Записує дані"
+}
+
+package "Сервер (Node.js)" {
+    component "Backend (Express)" {
+        [API Маршрути] as Routes
+        [Middleware] as Middleware
+        [Контролери] as Controllers
+        [Моделі] as Models
+        [Підключення БД] as DB
+        
+        Routes --> Middleware : "Обробка запитів"
+        Routes --> Controllers : "Обробка запитів"
+        Middleware --> Models : "Перевірка даних"
+        Controllers --> Models : "Бізнес-логіка"
+        Models --> DB : "Запити до БД"
+    }
+    
+    folder "Файлова Система" as FS
+    
+    ' Зв'язки файлової системи
+    Middleware ..> FS : "Зберігає файли"
+    Controllers ..> FS : "Видаляє файли"
+}
+
+database "База даних (MySQL)" {
+    [KendrDB]
+}
+
+' Головні потоки даних
+ApiClient ..> Routes : "HTTP API"
+DB ..> [KendrDB] : "SQL запити"
+
+' Нотатки
+note right of ApiClient
+  **API Клієнт**
+  Додає JWT-токен
+  до всіх запитів
+end note
+
+note right of Routing
+  **Роутинг**
+  Захищає маршрути
+  та перевіряє доступ
+end note
+
+note right of State
+  **Керування Станом**
+  Глобальний стан додатку
+  через React Context
+end note
+
+note left of Controllers
+  **Контролери**
+  Обробляють логіку запитів
+  та викликають моделі
+end note
+
+note left of Models
+  **Моделі**
+  Логіка доступу до даних
+  та бізнес-правила
+end note
+
+note left of DB
+  **Підключення БД**
+  Пул з'єднань з базою даних
+  для оптимізації
+end note
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+skinparam handwritten false
+skinparam shadowing false
+skinparam monochrome false
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+skinparam component {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+actor "Користувач\n(User)" as User
+
+package "Платформа Kendr" {
+  component "Редактор блоків" as Editor
+  component "Генератор коду" as Generator
+  database "База даних\n(MySQL)" as DB
+}
+
+artifact "Готовий Веб-сайт\n(Store / Portfolio)" as Site
+
+' Зв'язки
+User -right-> Editor : 1. Налаштування\nструктури та дизайну
+Editor -down-> DB : 2. Збереження\nконфігурації (JSON)
+DB -right-> Generator : 3. Вибірка даних
+Generator -up-> Site : 4. Рендеринг\nготового ресурсу
+
+@enduml

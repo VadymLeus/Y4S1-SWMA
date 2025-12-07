@@ -1,0 +1,18 @@
+@startuml
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+actor "Користувач" as User
+participant "Платформа\n(Kendr Core)" as Core
+database "Сховище\n(DB & Media)" as DB
+participant "Веб-сайт\n(Output)" as Site
+
+User -> Core : Створює проект (Drag-n-Drop)
+Core -> DB : Зберігає структуру блоків
+User -> Core : Натискає "Опублікувати"
+Core -> DB : Запитує конфігурацію
+DB --> Core : JSON дані блоків
+Core -> Site : Генерує сторінки та стилі
+Site --> User : Посилання на готовий ресурс
+
+@enduml

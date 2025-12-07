@@ -1,0 +1,65 @@
+@startuml
+
+!theme plain
+hide circle
+hide empty members
+
+' --- Сутності (Таблиці) ---
+entity "users" as users
+entity "templates" as templates
+entity "sites" as sites
+entity "pages" as pages
+entity "categories" as categories
+entity "products" as products
+entity "tags" as tags
+entity "site_tags" as site_tags
+entity "user_favorites" as user_favorites
+entity "support_tickets" as support_tickets
+entity "ticket_replies" as ticket_replies
+entity "user_warnings" as user_warnings
+entity "user_media" as user_media
+entity "form_submissions" as form_submissions
+entity "saved_blocks" as saved_blocks
+entity "user_templates" as user_templates
+entity "notifications" as notifications
+entity "achievements" as achievements
+entity "user_achievements" as user_achievements
+entity "site_visits" as site_visits
+
+' --- Зв'язки ---
+
+' Users relationships
+users ||..o{ sites : "owner"
+users ||..o{ user_favorites : "favorites"
+users ||..o{ support_tickets : "creates"
+users ||..o{ ticket_replies : "replies"
+users ||..o{ user_warnings : "receives"
+users ||..o{ user_media : "uploads"
+users ||..o{ saved_blocks : "saves"
+users ||..o{ user_templates : "creates"
+users ||..o{ notifications : "receives"
+users ||..o{ user_achievements : "earns"
+
+' Sites relationships
+sites ||..o{ pages : "contains"
+sites ||..o{ categories : "contains"
+sites ||..o{ products : "sells"
+sites ||..o{ site_tags : "tagged with"
+sites ||..o{ user_favorites : "favorited in"
+sites ||..o{ user_warnings : "warned regarding"
+sites ||..o{ form_submissions : "receives data"
+sites ||..o{ site_visits : "tracks visits"
+
+' Categories relationships
+categories |o..o{ products : "groups"
+
+' Tags relationships
+tags ||..o{ site_tags : "defines"
+
+' Support Tickets relationships
+support_tickets ||..o{ ticket_replies : "has"
+
+' Achievements relationships
+achievements ||..o{ user_achievements : "defines"
+
+@enduml
